@@ -1,64 +1,104 @@
 import { useState } from "react";
 import "./styles.css";
 
-const faqs = [
-  {
-    title: "Where are these chairs assembled?",
-    text:
-      "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Accusantium, quaerat temporibus quas dolore provident nisi ut aliquid ratione beatae sequi aspernatur veniam repellendus."
-  },
-  {
-    title: "How long do I have to return my chair?",
-    text:
-      "Pariatur recusandae dignissimos fuga voluptas unde optio nesciunt commodi beatae, explicabo natus."
-  },
-  {
-    title: "Do you ship to countries outside the EU?",
-    text:
-      "Excepturi velit laborum, perspiciatis nemo perferendis reiciendis aliquam possimus dolor sed! Dolore laborum ducimus veritatis facere molestias!"
-  }
-];
-
 export default function App() {
   return (
-    <div>
-      <Accordion data={faqs} />
+    <div className="app">
+      <TipCalculator />
     </div>
   );
 }
 
-function Accordion({ data }) {
-  return (
-    <div className="accordion">
-      <h2 className="accordion-title">Frequently Asked Questions</h2>
-      {data.map((el, i) => (
-        <AccordionItem title={el.title} text={el.text} num={i} key={el.title} />
-      ))}
-    </div>
-  );
-}
-
-function AccordionItem({ num, title, text }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  function handleToggle() {
-    setIsOpen((isOpen) => !isOpen);
+function TipCalculator() {
+  const [bill, setBill] = useState(0);
+  const [yourPercentage, setYourPercentage] = useState(0);
+  const [friendsPercentage, setFriendsPercentage] = useState(0);
+  
+  const tip = bill * ((yourPercentage + friendsPercentage) / 2 / 100);
+  
+  function handleReset() {
+    setBill(0);
+    setYourPercentage(0);
+    setFriendsPercentage(0);
   }
-
+  
   return (
-    <div className={`item ${isOpen ? "open" : ""}`} onClick={handleToggle}>
-      <p className="number">{num < 9 ? `0${num + 1}` : num + 1}</p>
-      <p className="title">{title}</p>
-      <div className="icon"></div>
+    <div className="calculator">
+      <h1>Tip Calculator</h1>
+      
+      <Bill bill={bill} onBill={setBill} />
+      
+      <TipPercentage
+        percentage={yourPercentage}
+        onSelect={setYourPercentage}
+      >
+        How did you like the service?
+      </TipPercentage>
+      
+      <TipPercentage
+        percentage={friendsPercentage}
+        onSelect={setFriendsPercentage}
+      >
+        How did your friends like the service?
+      </TipPercentage>
+      
+      {bill > 0 && (
+        <>
+          <Output bill={bill} tip={tip} />
+          <Reset onReset={handleReset} />
+        </>
+      )}
+    </div>
+  );
+}
 
-      <div className="content-box" style={{ display: isOpen ? "block" : "block" }}>
-        <p>{text}</p>
-        <ul>
-          <li>Additional information point one</li>
-          <li>More details about <span className="highlight">this topic</span></li>
-          <li>Extra resources and links</li>
-        </ul>
-      </div>
+function Bill({ bill, onBill }) {
+  return (
+    <div className="input-group">
+      <h2>How much is your bill?</h2>
+      <input
+        type="number"
+        min="0"
+        value={bill}
+        onChange={(e) => onBill(Number(e.target.value))}
+        className="input-field"
+      />
+    </div>
+  );
+}
+
+function TipPercentage({ percentage, onSelect, children }) {
+  return (
+    <div className="input-group">
+      <h2>{children}</h2>
+      <select
+        value={percentage}
+        onChange={(e) => onSelect(Number(e.target.value))}
+        className="select-field"
+      >
+        <option value="0">0%</option>
+        <option value="5">5%</option>
+        <option value="10">10%</option>
+        <option value="15">15%</option>
+        <option value="20">20%</option>
+      </select>
+    </div>
+  );
+}
+
+function Output({ bill, tip }) {
+  return (
+    <div className="output">
+      <h3>Tip: ${tip.toFixed(2)}</h3>
+      <h3>Total: ${(bill + tip).toFixed(2)}</h3>
+    </div>
+  );
+}
+
+function Reset({ onReset }) {
+  return (
+    <div className="reset">
+      <button onClick={onReset} className="reset-button">Reset</button>
     </div>
   );
 }
